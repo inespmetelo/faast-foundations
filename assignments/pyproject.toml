@@ -6,7 +6,7 @@ requires-python = ">=3.8"
 description = "First assignment of the Foundations Learning Path"
 authors = [{name = "Inês Metelo"}]
 
-dependencies = ["pandas"]
+dependencies = ["pandas", "argparse"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pylint", "pytest-cov", "toml"]
