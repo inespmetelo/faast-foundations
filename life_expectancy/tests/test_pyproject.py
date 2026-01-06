@@ -9,7 +9,7 @@ feel free to delete this file.
 """
 from pkg_resources import DistributionNotFound, get_distribution
 
-import toml
+import tomllib
 import pytest
 import pylint
 import pytest_cov
@@ -31,7 +31,8 @@ def test_dependencies():
 
 def test_pyproject():
     """Test that the pyproject.toml is correct."""
-    pyproject = toml.load(PROJECT_DIR / "pyproject.toml")
+    with open("pyproject.toml", "rb") as f:
+        pyproject = tomllib.load(f)
 
     authors = pyproject["project"]["authors"]
     has_new_author = False
