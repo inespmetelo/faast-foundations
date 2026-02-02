@@ -1,16 +1,42 @@
 """Tests for the cleaning module"""
 import pandas as pd
-
 from life_expectancy.cleaning import clean_data
-from . import OUTPUT_DIR
+from . import FIXTURES_DIR
 
 
-def test_clean_data(pt_life_expectancy_expected):
-    """Run the `clean_data` function and compare the output to the expected output"""
-    clean_data(country="PT")
-    pt_life_expectancy_actual = pd.read_csv(
-        OUTPUT_DIR / "pt_life_expectancy.csv"
+def test_clean_data_pt(
+    pt_life_expectancy_expected,
+    tmp_path
+):
+    """Test clean_data() for PT using fixture input and expected output"""
+    tmp_out = tmp_path / "pt_life_expectancy.csv"
+
+    result_df = clean_data(
+        country="PT",
+        input_path=FIXTURES_DIR / "eu_life_expectancy_raw_sample.tsv",
+        output_path=tmp_out
     )
+
     pd.testing.assert_frame_equal(
-        pt_life_expectancy_actual, pt_life_expectancy_expected
+        result_df.reset_index(drop=True),
+        pt_life_expectancy_expected.reset_index(drop=True)
+    )
+
+
+def test_clean_data_es(
+    es_life_expectancy_expected,
+    tmp_path
+):
+    """Test clean_data() for ES using fixture input and expected output"""
+    tmp_out = tmp_path / "es_life_expectancy.csv"
+
+    result_df = clean_data(
+        country="ES",
+        input_path=FIXTURES_DIR / "eu_life_expectancy_raw_sample.tsv",
+        output_path=tmp_out
+    )
+
+    pd.testing.assert_frame_equal(
+        result_df.reset_index(drop=True),
+        es_life_expectancy_expected.reset_index(drop=True)
     )
