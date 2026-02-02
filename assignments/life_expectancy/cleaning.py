@@ -4,6 +4,7 @@ from pathlib import Path
 import argparse
 
 import pandas as pd
+from life_expectancy.io import load_raw_data, save_clean_data
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -11,14 +12,19 @@ DATA_DIR = BASE_DIR / "data"
 DATA_PATH = DATA_DIR / "eu_life_expectancy_raw.tsv"
 OUTPUT_PATH = DATA_DIR / "pt_life_expectancy.csv"
 
-def clean_data(country: str = "PT") -> pd.DataFrame:
+def clean_data(
+    country: str = "PT",
+    input_path: Path = DATA_PATH,
+    output_path: Path = OUTPUT_PATH
+) -> pd.DataFrame:
+
     """
     Loads eu_life_expectancy_raw.tsv, unpivots it to long format, ensures correct data types,
     filters by country, and saves the cleaned data to eu_life_expectancy_cleaned.csv.
     """
 
     # Load the dataset
-    df = pd.read_csv(DATA_PATH, sep="\t")
+    df = load_raw_data(input_path)
 
     # Identifier columns
     meta_col = df.columns[0]  # "unit,sex,age,geo\\time"
@@ -60,8 +66,7 @@ def clean_data(country: str = "PT") -> pd.DataFrame:
     df_long = df_long[df_long["region"] == country]
 
     # Save
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    df_long.to_csv(OUTPUT_PATH, index=False)
+    save_clean_data(df_long, output_path)
 
     return df_long
 
@@ -76,4 +81,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    clean_data(country=args.country)
+    clean_data(country=args.country, output_path=OUTPUT_PATH, input_path=DATA_PATH)
