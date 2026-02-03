@@ -7,7 +7,6 @@ since we are learning, this is a special case.
 Once you have ensured that the package and its dependencies are installed,
 feel free to delete this file.
 """
-from pkg_resources import DistributionNotFound, get_distribution
 
 import tomllib
 import pytest
@@ -15,7 +14,7 @@ import pylint
 import pytest_cov
 import pandas as pd
 
-from . import PROJECT_DIR
+from pkg_resources import DistributionNotFound, get_distribution
 
 
 def test_dependencies():
