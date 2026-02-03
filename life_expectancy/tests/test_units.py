@@ -8,19 +8,18 @@ from life_expectancy.cleaning import load_data, clean_data, save_data, main
 
 
 # load data UNIT TEST
-def test_load_data(sample_life_expectancy_input):
-    """Unit test for load_data()"""
+@patch("pandas.read_csv")
+def test_load_data(mock_read_csv, sample_life_expectancy_input):
+    """Unit test for load_data() using mock (no file reading)"""
 
-    # create temp file
-    tmp_file = Path("tmp_test.tsv")
-    sample_life_expectancy_input.to_csv(tmp_file, sep="\t", index=False)
+    mock_read_csv.return_value = sample_life_expectancy_input
+    fake_path = Path("fake.tsv")
 
-    df = load_data(tmp_file)
+    df = load_data(fake_path)
 
     assert isinstance(df, pd.DataFrame)
     assert not df.empty
-
-    tmp_file.unlink()
+    mock_read_csv.assert_called_once_with(fake_path, sep='\t')
 
 
 # Clean data UNIT TEST
