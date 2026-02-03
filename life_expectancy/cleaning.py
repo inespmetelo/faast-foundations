@@ -67,11 +67,12 @@ def save_data(df: pd.DataFrame, path: Path = OUTPUT_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, index=False)
 
-def main(country: str = "PT") -> None:
-    """Run the full data cleaning pipeline."""
+def main(country: str = "PT") -> pd.DataFrame:
+    """Run the full data cleaning pipeline and return cleaned data."""
     raw_data = load_data()
     cleaned_data = clean_data(raw_data, country=country)
     save_data(cleaned_data)
+    return cleaned_data
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
