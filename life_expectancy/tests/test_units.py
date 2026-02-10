@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from life_expectancy.cleaning import load_data, clean_data, save_data, main
+from life_expectancy.regions import Region
 
 
 # load data UNIT TEST
@@ -26,7 +27,7 @@ def test_load_data(mock_read_csv, sample_life_expectancy_input):
 def test_clean_data_unit(sample_life_expectancy_input):
     """Unit test for clean_data()"""
 
-    result = clean_data(sample_life_expectancy_input, country="PT")
+    result = clean_data(sample_life_expectancy_input, country=Region.PT)
 
     assert isinstance(result, pd.DataFrame)
     assert "year" in result.columns
@@ -59,8 +60,39 @@ def test_main(mock_load, mock_clean, mock_save):
     mock_load.return_value = fake_df
     mock_clean.return_value = fake_df
 
-    main(country="PT")
+    main(country=Region.PT)
 
     mock_load.assert_called_once()
     mock_clean.assert_called_once()
     mock_save.assert_called_once()
+
+
+# regions UNIT TEST
+def test_region_actual_countries():
+    """Test that actual_countries removes non-country regions."""
+    countries = Region.actual_countries()
+
+    # Should not contain aggregates
+    forbidden = {
+        Region.EU28,
+        Region.EFTA,
+        Region.EU27_2020,
+        Region.EA19,
+        Region.EEA31,
+        Region.DE_TOT,
+    }
+
+    for f in forbidden:
+        assert f not in countries
+
+    # Should contain real countries
+    expected = {
+        Region.PT,
+        Region.ES,
+        Region.FR,
+        Region.DE,
+        Region.IT,
+    }
+
+    for e in expected:
+        assert e in countries
