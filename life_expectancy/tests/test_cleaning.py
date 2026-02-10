@@ -1,16 +1,34 @@
 """Tests for the cleaning module"""
+
 import pandas as pd
+import pytest
 
-from life_expectancy.cleaning import main as clean_data
-from . import OUTPUT_DIR
+from life_expectancy.cleaning import clean_data
 
 
-def test_clean_data(pt_life_expectancy_expected):
-    """Run the `clean_data` function and compare the output to the expected output"""
-    clean_data(country="PT")
-    pt_life_expectancy_actual = pd.read_csv(
-        OUTPUT_DIR / "pt_life_expectancy.csv"
+@pytest.mark.parametrize(
+    "country,expected_fixture",
+    [
+        ("PT", "pt_life_expectancy_expected"),
+        ("ES", "es_life_expectancy_expected"),
+    ],
+)
+def test_clean_data(
+    sample_life_expectancy_input,
+    country,
+    expected_fixture,
+    request,
+):
+    """Test clean_data() for different countries using fixture input and expected output"""
+
+    expected_df = request.getfixturevalue(expected_fixture)
+
+    result_df = clean_data(
+        sample_life_expectancy_input,
+        country=country,
     )
+
     pd.testing.assert_frame_equal(
-        pt_life_expectancy_actual, pt_life_expectancy_expected
+        result_df.reset_index(drop=True),
+        expected_df.reset_index(drop=True),
     )
