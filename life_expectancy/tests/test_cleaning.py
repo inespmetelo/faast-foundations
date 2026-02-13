@@ -4,13 +4,14 @@ import pandas as pd
 import pytest
 
 from life_expectancy.cleaning import clean_data
+from life_expectancy.regions import Region
 
 
 @pytest.mark.parametrize(
     "country,expected_fixture",
     [
-        ("PT", "pt_life_expectancy_expected"),
-        ("ES", "es_life_expectancy_expected"),
+        (Region.PT, "pt_life_expectancy_expected"),
+        (Region.ES, "es_life_expectancy_expected"),
     ],
 )
 def test_clean_data(

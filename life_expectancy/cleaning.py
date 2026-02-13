@@ -3,6 +3,7 @@
 from pathlib import Path
 import argparse
 import pandas as pd
+from life_expectancy.regions import Region
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -14,7 +15,7 @@ def load_data(path: Path = DATA_PATH) -> pd.DataFrame:
     """Load the raw EU life expectancy dataset."""
     return pd.read_csv(path, sep="\t")
 
-def clean_data(df: pd.DataFrame, country: str = "PT") -> pd.DataFrame:
+def clean_data(df: pd.DataFrame, country: Region = Region.PT) -> pd.DataFrame:
     """
     Clean the EU life expectancy dataset:
     - unpivot to long format
@@ -58,7 +59,7 @@ def clean_data(df: pd.DataFrame, country: str = "PT") -> pd.DataFrame:
     df_long["value"] = df_long["value"].astype(float)
 
     # Filter by country
-    df_long = df_long[df_long["region"] == country]
+    df_long = df_long[df_long["region"] == country.value]
 
     return df_long
 
@@ -67,7 +68,7 @@ def save_data(df: pd.DataFrame, path: Path = OUTPUT_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, index=False)
 
-def main(country: str = "PT") -> pd.DataFrame:
+def main(country: Region = Region.PT) -> pd.DataFrame:
     """Run the full data cleaning pipeline and return cleaned data."""
     raw_data = load_data()
     cleaned_data = clean_data(raw_data, country=country)
@@ -81,8 +82,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--country",
         default="PT",
-        help="Country code to filter (default: PT)",
+        choices=[r.value for r in Region],
+        help="Country code to filter",
     )
     args = parser.parse_args()
 
-    main(country=args.country)
+    main(country=Region(args.country))
