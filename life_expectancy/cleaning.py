@@ -1,9 +1,11 @@
 """Data cleaning utilities for EU life expectancy dataset."""
 
 from pathlib import Path
+from typing import Optional, Union
 import argparse
 import pandas as pd
 from life_expectancy.regions import Region
+from life_expectancy.data_loader import DataLoader, DataLoaderFactory
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -11,9 +13,22 @@ DATA_DIR = BASE_DIR / "data"
 DATA_PATH = DATA_DIR / "eu_life_expectancy_raw.tsv"
 OUTPUT_PATH = DATA_DIR / "pt_life_expectancy.csv"
 
-def load_data(path: Path = DATA_PATH) -> pd.DataFrame:
-    """Load the raw EU life expectancy dataset."""
-    return pd.read_csv(path, sep="\t")
+def load_data(
+    path: Union[Path, str] = DATA_PATH,
+    loader: Optional[DataLoader] = None
+) -> pd.DataFrame:
+    """Load the raw EU life expectancy data using a loading strategy.
+
+    Args:
+        path: Path to the data file
+        loader: Optional DataLoader strategy. If None, auto-selects by extension.
+
+    Returns:
+        pd.DataFrame: Loaded data
+    """
+    if loader is None:
+        loader = DataLoaderFactory.get_loader(path)
+    return loader.load(path)
 
 def clean_data(df: pd.DataFrame, country: Region = Region.PT) -> pd.DataFrame:
     """
@@ -68,9 +83,22 @@ def save_data(df: pd.DataFrame, path: Path = OUTPUT_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, index=False)
 
-def main(country: Region = Region.PT) -> pd.DataFrame:
-    """Run the full data cleaning pipeline and return cleaned data."""
-    raw_data = load_data()
+def main(
+    country: Region = Region.PT,
+    data_path: Union[Path, str] = DATA_PATH,
+    loader: Optional[DataLoader] = None
+) -> pd.DataFrame:
+    """Run the full data cleaning pipeline and return cleaned data.
+    
+    Args:
+        country: Region to filter data for
+        data_path: Path to the input data file
+        loader: Optional DataLoader strategy
+        
+    Returns:
+        pd.DataFrame: Cleaned data
+    """
+    raw_data = load_data(data_path, loader)
     cleaned_data = clean_data(raw_data, country=country)
     save_data(cleaned_data)
     return cleaned_data
@@ -85,6 +113,12 @@ if __name__ == "__main__":
         choices=[r.value for r in Region],
         help="Country code to filter",
     )
+    parser.add_argument(
+        "--data-path",
+        type=Path,
+        default=DATA_PATH,
+        help="Path to the input data file (supports .tsv, .csv, .json)",
+    )
     args = parser.parse_args()
 
-    main(country=Region(args.country))
+    main(country=Region(args.country), data_path=args.data_path)
